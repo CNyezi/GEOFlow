@@ -589,6 +589,16 @@
                                     </div>
                                 </div>
                                 <div class="mt-4">
+                                    <label class="mb-2 block text-xs font-medium text-gray-600">{{ __('admin.site_settings.homepage.field_lead_form') }}</label>
+                                    <select name="homepage_modules[{{ $index }}][lead_form_slug]" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <option value="">{{ __('admin.site_settings.homepage.lead_form_none') }}</option>
+                                        @foreach ($leadForms as $leadForm)
+                                            <option value="{{ $leadForm->slug }}" @selected(($module['lead_form_slug'] ?? '') === $leadForm->slug)>{{ $leadForm->name }} (/forms/{{ $leadForm->slug }})</option>
+                                        @endforeach
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-500">{{ __('admin.site_settings.homepage.lead_form_help') }}</p>
+                                </div>
+                                <div class="mt-4">
                                     <label class="mb-2 block text-xs font-medium text-gray-600">{{ __('admin.site_settings.homepage.field_custom_html') }}</label>
                                     <textarea name="homepage_modules[{{ $index }}][custom_html]" rows="3" class="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-xs shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="<p>HTML snippet</p>">{{ $module['custom_html'] ?? '' }}</textarea>
                                 </div>
@@ -611,7 +621,6 @@
 
                     @php
                         $currentThemeLabel = __('admin.site_settings.theme.default_name');
-                        $canEditThemeFiles = auth('admin')->user()?->isSuperAdmin() === true;
                         foreach ($availableThemes as $themeOption) {
                             if ($themeOption['id'] === $settings['active_theme']) {
                                 $currentThemeLabel = $themeOption['name'];
@@ -626,6 +635,7 @@
                         <div class="text-xs text-gray-500">{{ __('admin.site_settings.theme.current_help') }}</div>
                     </div>
 
+                    @if ($canManageProtectedWorkflows)
                     <div class="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-5">
                         <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                             <div class="min-w-0">
@@ -635,9 +645,7 @@
                                 </div>
                                 <h4 class="mt-3 text-base font-semibold text-gray-900">{{ __('admin.theme_replication.entry_title') }}</h4>
                                 <p class="mt-1 text-sm text-gray-600">{{ __('admin.theme_replication.entry_desc') }}</p>
-                                @if (! ($themeReplicationDeployment['can_publish_directly'] ?? false))
-                                    <p class="mt-2 text-xs text-amber-700">{{ __('admin.theme_replication.deployment.readonly_hint') }}</p>
-                                @endif
+                                <p class="mt-2 text-xs text-amber-700">{{ __('admin.theme_replication.deployment.package_only_hint') }}</p>
                             </div>
                             <a href="{{ route('admin.site-settings.theme-replications.create') }}" class="inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">
                                 <i data-lucide="copy-plus" class="mr-2 h-4 w-4"></i>
@@ -659,6 +667,7 @@
                             </div>
                         @endif
                     </div>
+                    @endif
 
                     <div class="space-y-4">
                         <label class="flex items-start gap-4 rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
@@ -684,21 +693,6 @@
                                     </div>
                                     <div class="mt-1 text-sm text-gray-600">
                                         {{ $themeOption['description'] !== '' ? $themeOption['description'] : __('admin.site_settings.theme.no_description') }}
-                                    </div>
-                                    <div class="mt-3 flex flex-wrap gap-2">
-                                        @if ($canEditThemeFiles)
-                                            <a href="{{ route('admin.site-settings.theme-editor.preview', ['themeId' => $themeOption['id'], 'page' => 'home'], false) }}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">{{ __('admin.site_settings.theme.preview_home') }}</a>
-                                            <a href="{{ route('admin.site-settings.theme-editor.preview', ['themeId' => $themeOption['id'], 'page' => 'category'], false) }}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">{{ __('admin.site_settings.theme.preview_category') }}</a>
-                                            <a href="{{ route('admin.site-settings.theme-editor.preview', ['themeId' => $themeOption['id'], 'page' => 'article'], false) }}" target="_blank" rel="noopener" onclick="event.stopPropagation();" class="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">{{ __('admin.site_settings.theme.preview_article') }}</a>
-                                            <a href="{{ route('admin.site-settings.theme-editor.edit', ['themeId' => $themeOption['id'], 'page' => 'home'], false) }}" onclick="event.stopPropagation();" class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100">{{ __('admin.site_settings.theme.editor_home') }}</a>
-                                            <a href="{{ route('admin.site-settings.theme-editor.edit', ['themeId' => $themeOption['id'], 'page' => 'category'], false) }}" onclick="event.stopPropagation();" class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100">{{ __('admin.site_settings.theme.editor_category') }}</a>
-                                            <a href="{{ route('admin.site-settings.theme-editor.edit', ['themeId' => $themeOption['id'], 'page' => 'article'], false) }}" onclick="event.stopPropagation();" class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100">{{ __('admin.site_settings.theme.editor_article') }}</a>
-                                        @else
-                                            <span class="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-500">{{ __('admin.site_settings.theme.preview_home') }}</span>
-                                            <span class="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-500">{{ __('admin.site_settings.theme.preview_category') }}</span>
-                                            <span class="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-500">{{ __('admin.site_settings.theme.preview_article') }}</span>
-                                        @endif
-                                        <span class="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-500">{{ __('admin.site_settings.theme.preview_archive') }}</span>
                                     </div>
                                 </div>
                             </label>
@@ -1106,6 +1100,16 @@
                     <label class="mb-2 block text-xs font-medium text-gray-600">{{ __('admin.site_settings.homepage.field_link_url') }}</label>
                     <input type="text" name="homepage_modules[__INDEX__][link_url]" value="" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="/category/demo">
                 </div>
+            </div>
+            <div class="mt-4">
+                <label class="mb-2 block text-xs font-medium text-gray-600">{{ __('admin.site_settings.homepage.field_lead_form') }}</label>
+                <select name="homepage_modules[__INDEX__][lead_form_slug]" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">{{ __('admin.site_settings.homepage.lead_form_none') }}</option>
+                    @foreach ($leadForms as $leadForm)
+                        <option value="{{ $leadForm->slug }}">{{ $leadForm->name }} (/forms/{{ $leadForm->slug }})</option>
+                    @endforeach
+                </select>
+                <p class="mt-1 text-xs text-gray-500">{{ __('admin.site_settings.homepage.lead_form_help') }}</p>
             </div>
             <div class="mt-4">
                 <label class="mb-2 block text-xs font-medium text-gray-600">{{ __('admin.site_settings.homepage.field_custom_html') }}</label>
