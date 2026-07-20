@@ -39,7 +39,7 @@
 @section('content')
     <div class="tt-shell tt-article-layout">
         <nav class="tt-breadcrumb tt-article-module" aria-label="Breadcrumb">
-            <a href="{{ route('site.home') }}">{{ __('front.nav.home') }}</a>
+            <a href="{{ route('site.home') }}">Home</a>
             @if($article->category)
                 <span>/</span>
                 <a href="{{ route('site.category', $article->category->slug) }}">{{ $article->category->name }}</a>
@@ -119,7 +119,7 @@
                     <span class="tt-title-row">{{ $siteTitle }}</span>
                 </div>
                 <p class="text-sm leading-7 text-gray-600">{{ $siteDescription }}</p>
-                <a href="{{ route('site.home') }}" class="tt-card-action">{{ __('front.nav.home') }} <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+                <a href="{{ route('site.home') }}" class="tt-card-action">Home <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
             </section>
         </aside>
     </div>
